@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.Callback;
+import android.support.v4.content.FileProvider;
 
 import java.util.List;
 import java.io.File;
@@ -53,8 +54,10 @@ public class RNMailModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void mail(ReadableMap options, Callback callback) {
-    Intent i = new Intent(Intent.ACTION_SENDTO);
-    i.setData(Uri.parse("mailto:"));
+    Intent i = new Intent(Intent.ACTION_SEND);
+    i.setType("application/octet-stream");
+    // Intent i = new Intent(Intent.ACTION_SENDTO);
+    // i.setData(Uri.parse("mailto:"));
 
     if (options.hasKey("subject") && !options.isNull("subject")) {
       i.putExtra(Intent.EXTRA_SUBJECT, options.getString("subject"));
@@ -89,7 +92,10 @@ public class RNMailModule extends ReactContextBaseJavaModule {
       if (attachment.hasKey("path") && !attachment.isNull("path")) {
         String path = attachment.getString("path");
         File file = new File(path);
-        Uri p = Uri.fromFile(file);
+        Uri p = FileProvider.getUriForFile(
+                reactContext,
+                reactContext.getApplicationContext().getPackageName() + ".provider", file);
+        // Uri p = Uri.fromFile(file);
         i.putExtra(Intent.EXTRA_STREAM, p);
       }
     }
